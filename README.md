@@ -5,6 +5,13 @@ Give it a link — it extracts the transcript, flags every key teaching
 moment, captures and annotates chart screenshots, and builds a structured
 study document.
 
+The agent specification lives in [`CLAUDE.md`](CLAUDE.md) — Claude Code
+loads it automatically in this folder. Commands: `notes: <url|pdf>`,
+`batch: <urls.txt>`, `resume`, `annotate: full`. It handles PDFs as well
+as videos, keeps per-job `state.json` for resumability, and exports
+`notes.md` + self-contained `notes.html` (pandoc). Optionally add your
+`PLAYBOOK.md` for model tagging.
+
 Ships two ways to run it:
 
 ## 1. One-command pipeline (token-cheap "cavemen mode")
