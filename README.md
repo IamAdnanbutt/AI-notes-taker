@@ -1,58 +1,56 @@
 # AI Notes Taker
 
-An agentic AI note-taking toolkit for YouTube trading videos, built as a
-[Claude Code skill](https://code.claude.com/docs/en/skills).
+Agentic AI note-taker for YouTube ICT (Inner Circle Trader) videos.
+Give it a link — it extracts the transcript, flags every key teaching
+moment, captures and annotates chart screenshots, and builds a structured
+study document.
 
-## Cavemen — YouTube ICT Video Note-Taker
+Ships two ways to run it:
 
-The `cavemen` skill (`.claude/skills/cavemen/`) turns Claude Code into an
-autonomous ICT (Inner Circle Trader) video study agent. Give it a YouTube
-link and it:
+## 1. One-command pipeline (token-cheap "cavemen mode")
 
-1. Extracts the video metadata and full transcript with timestamps
-2. Flags every key teaching moment (chart examples, trade setups,
-   ICT concepts, presenter cues)
-3. Captures the exact video frame at each flagged timestamp
-4. Annotates each screenshot with ICT labels — FVGs, Order Blocks,
-   liquidity sweeps, MSS, PO3, Kill Zones, entry/SL/TP levels
-5. Writes a structured note block under each screenshot (model, concept,
-   timeframe, session, playbook rule, trade setup, key lesson)
-6. Exports a formatted study document with a master summary, table of
-   contents, and clickable timestamp links
+```bash
+pip install yt-dlp Pillow   # plus ffmpeg on PATH
+python3 ai_notes_taker.py "https://www.youtube.com/watch?v=..."
+```
 
-### Usage
+Mechanically does the heavy lifting without burning AI tokens:
 
-In Claude Code, from this repository:
+1. Fetches metadata + full transcript with timestamps
+2. Auto-flags every ICT keyword moment (FVG, OB, sweeps, MSS, PO3,
+   Kill Zones, entries/SL/TP, presenter cues...)
+3. Extracts a video frame per flagged moment
+4. Writes `notes/<video-slug>/NOTES.md` — a scaffold with a prefilled
+   note block and clickable timestamp link under every screenshot
+
+Then annotate the screenshots and fill the TODO analysis fields —
+yourself, or with the skill below.
+
+## 2. Claude Code skill (`ai-notes-taker`)
+
+`.claude/skills/ai-notes-taker/` turns Claude Code into the full
+autonomous study agent from the master prompt. In this repo say:
 
 ```
 Make notes for this video: https://www.youtube.com/watch?v=...
 ```
 
-or invoke the skill directly with `/cavemen`.
-
-### Requirements
-
-- `yt-dlp` — video, metadata, and caption download
-- `ffmpeg` — frame extraction
-- Python 3 with `Pillow` — screenshot annotation
-
-```bash
-pip install yt-dlp Pillow
-```
+Claude runs the pipeline, reviews each frame, draws the color-coded ICT
+annotations (`scripts/annotate.py`), completes every note block, and adds
+the master summary (top 5 lessons, model mapping, study score).
 
 ### Layout
 
 ```
-.claude/skills/cavemen/
-├── SKILL.md                        # the agent workflow
+ai_notes_taker.py                   # one-command pipeline
+.claude/skills/ai-notes-taker/
+├── SKILL.md                        # agent workflow
 ├── references/
 │   ├── concept-detection.md        # ICT concepts that trigger a screenshot
-│   ├── annotation-legend.md        # mandatory annotation color code
-│   └── note-template.md            # note block structure + worked example
+│   ├── annotation-legend.md        # annotation color code
+│   └── note-template.md            # note block structure + example
 └── scripts/
     ├── ict_video.py                # info / transcript / frames helpers
     └── annotate.py                 # draws ICT labels on screenshots
+notes/<video-slug>/                 # generated: NOTES.md + screenshots/
 ```
-
-Generated study documents land in `notes/<video-slug>/NOTES.md` with
-annotated screenshots in `notes/<video-slug>/screenshots/`.
